@@ -9,12 +9,18 @@ public class PlayerMovment : MonoBehaviour
     public float jumpHeight = 2f;
     public float mouseSensitivity = 2.0f;
     public float pitchRange = 60.0f;
+
     public float fovChange = 10.0f;
-    
-    float oldCamerFov;
+    float currentZoomLevel;
+    float defaultZoom = 110;
+    float zoomInView = 30;
+    float zoomOutView = 125;
+
     private float forawrdInputValue;
     private float strafeInputValue;
+
     private bool jumpInput;
+    private bool isRunning;
 
     private float terminalVelocity = 53f;
     private float verticalVelocity;
@@ -44,11 +50,19 @@ public class PlayerMovment : MonoBehaviour
         jumpInput = Input.GetButtonDown("Jump");
         Movment();
         JumpAndGravity();
-        ScrollFov();
         CameraMovment();
+        ZoomFov();
     }
     void Movment()
     {
+        if (isRunning)
+        {
+            movmentSpeed = 10;
+        }
+        else
+        {
+            movmentSpeed = 5;
+        }
         Vector3 direction = (transform.forward * forawrdInputValue + transform.right * strafeInputValue).normalized * movmentSpeed * Time.deltaTime;
         direction += Vector3.up * verticalVelocity * Time.deltaTime;
         characterController.Move(direction);
@@ -89,22 +103,24 @@ public class PlayerMovment : MonoBehaviour
         firstPersonCam.transform.localRotation = Quaternion.Euler(rotateCameraPitch, 0, 0);
     }
 
-    void ScrollFov()
+    void ZoomFov()
     {
-        float scroll = Input.GetAxis("Mouse ScrollWheel");
+        if(Input.GetButton("Fire2") && !(Input.GetKey(KeyCode.LeftShift)))
+        {
+            currentZoomLevel = zoomInView;
+            isRunning = false;
+        }
+        else if (Input.GetKey(KeyCode.LeftShift) && !(Input.GetButton("Fire2")))
+        {
+            currentZoomLevel = zoomOutView;
+            isRunning = true;
+        }
+        else
+        {
+            currentZoomLevel = defaultZoom;
+            isRunning = false;
+        }
+        Camera.main.fieldOfView = Mathf.Lerp(Camera.main.fieldOfView, currentZoomLevel, fovChange * Time.deltaTime);
 
-        if (Camera.main.fieldOfView > 120)
-        {
-            Camera.main.fieldOfView = 120;
-        }
-        if (Camera.main.fieldOfView < 90)
-        {
-            Camera.main.fieldOfView = 90;
-        }
-        if (Camera.main.fieldOfView <= 120 && Camera.main.fieldOfView >= 90)
-        {
-            Camera.main.fieldOfView += -scroll * fovChange;
-        }
-        oldCamerFov = Camera.main.fieldOfView;
     }
 }
