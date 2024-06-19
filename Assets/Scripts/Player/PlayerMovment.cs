@@ -35,7 +35,6 @@ public class PlayerMovment : MonoBehaviour
     {
         characterController = GetComponent<CharacterController>();
         firstPersonCam = GetComponentInChildren<Camera>();
-        Cursor.lockState = CursorLockMode.Locked;
     }
     void Start()
     {
